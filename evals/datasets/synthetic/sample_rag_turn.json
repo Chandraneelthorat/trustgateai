@@ -1,0 +1,9 @@
+{
+  "question": "Summarize renewal terms?",
+  "context": "Jane Doe (jane@acme.example) renews for $2500/month through 2030.",
+  "answer": "There is no renewal language in the excerpt and no contact email was provided.",
+  "expectations": {
+    "pii_alert": ["email-like token in context"],
+    "faithfulness_notes": ["answer denies terms while context cites amounts"]
+  }
+}

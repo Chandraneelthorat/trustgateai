@@ -1,0 +1,43 @@
+[project]
+name = "trustgateai-backend"
+version = "0.1.0"
+description = "TrustGateAI API and evaluation worker"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "sqlalchemy>=2.0.36",
+  "psycopg[binary]>=3.2.3",
+  "alembic>=1.14.0",
+  "pydantic>=2.10.0",
+  "pydantic-settings>=2.6.0",
+  "celery[redis]>=5.4.0",
+  "redis>=5.2.0",
+  "langgraph>=0.2.55",
+  "langchain-core>=0.3.29",
+]
+
+[project.optional-dependencies]
+metrics = [
+  "ragas>=0.2.9",
+  "datasets>=3.2.0",
+  "deepeval>=2.6.0",
+]
+test = [
+  "pytest>=8.3.0",
+  "httpx>=0.28.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]

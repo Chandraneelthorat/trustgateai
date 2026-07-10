@@ -1,0 +1,80 @@
+# Render blueprint for the TrustGateAI backend (API + worker + Postgres + Redis).
+# Import via Render dashboard -> "New +" -> "Blueprint" and point at this repo.
+# Free-tier names/plans may need adjusting for your account; treat this as a starting point.
+# The Next.js frontend deploys separately on Vercel (see README).
+
+databases:
+  - name: trustgateai-db
+    databaseName: trustgateai
+    user: trustgateai
+    plan: free
+
+services:
+  - type: redis
+    name: trustgateai-redis
+    plan: free
+    ipAllowList: []
+
+  - type: web
+    name: trustgateai-api
+    runtime: python
+    rootDir: apps/backend
+    plan: free
+    buildCommand: pip install -e .
+    startCommand: alembic upgrade head; uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: SKIP_CELERY_SYNC
+        value: "0"
+      - key: CORS_ORIGINS
+        sync: false # set to your Vercel URL, e.g. https://trustgateai.vercel.app
+      - key: DATABASE_URL
+        fromDatabase:
+          name: trustgateai-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: trustgateai-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: trustgateai-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: trustgateai-redis
+          property: connectionString
+
+  - type: worker
+    name: trustgateai-worker
+    runtime: python
+    rootDir: apps/backend
+    plan: free
+    buildCommand: pip install -e .
+    startCommand: celery -A app.worker:celery_app worker --loglevel=INFO
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: trustgateai-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: trustgateai-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: trustgateai-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: trustgateai-redis
+          property: connectionString

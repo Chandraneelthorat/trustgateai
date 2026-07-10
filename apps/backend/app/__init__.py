@@ -1,0 +1,1 @@
+"""TrustGateAI FastAPI package."""
